@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="export-container">
         <t-space direction="vertical" size="large" style="width: 100%">
             <t-card :title="i18nStore.t('importConfigTitle')" header-bordered>
@@ -95,13 +95,12 @@ function onOpenFileCordova(path) {
 
 async function setExportDir() {
     if (window.__dirname) {
-        const remote = window.require ? window.require('@electron/remote') : null
-        if (remote) {
-            const { dialog } = remote
-            const result = await dialog.showOpenDialog({
+        const electron = window.require ? window.require('electron') : null
+        if (electron && electron.ipcRenderer) {
+            const result = await electron.ipcRenderer.invoke('show-open-dialog', {
                 properties: ['openDirectory'],
             })
-            if (!result.canceled) {
+            if (!result.canceled && result.filePaths.length > 0) {
                 appData.config.data.lastDefaultSavedDirectory = result.filePaths[0].replace(/\\/g, '/') + '/'
             }
         }

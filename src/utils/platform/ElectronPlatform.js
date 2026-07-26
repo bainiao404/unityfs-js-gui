@@ -1,6 +1,5 @@
-﻿import { PlatformAdapter } from './PlatformAdapter'
+import { PlatformAdapter } from './PlatformAdapter'
 
-const remote = typeof window !== 'undefined' && window.require ? window.require('@electron/remote') : null
 const electron = typeof window !== 'undefined' && window.require ? window.require('electron') : null
 
 export class ElectronPlatform extends PlatformAdapter {
@@ -12,8 +11,8 @@ export class ElectronPlatform extends PlatformAdapter {
     }
 
     async selectFilesOrFolder(options = { type: 'file' }) {
-        if (!remote) return []
-        const result = await remote.dialog.showOpenDialog({
+        if (!electron || !electron.ipcRenderer) return []
+        const result = await electron.ipcRenderer.invoke('show-open-dialog', {
             properties: options.type === 'file' ? ['openFile', 'multiSelections'] : ['openDirectory'],
         })
         if (result.canceled) return []
@@ -24,8 +23,8 @@ export class ElectronPlatform extends PlatformAdapter {
     }
 
     async selectDirectory() {
-        if (!remote) return ''
-        const result = await remote.dialog.showOpenDialog({
+        if (!electron || !electron.ipcRenderer) return ''
+        const result = await electron.ipcRenderer.invoke('show-open-dialog', {
             properties: ['openDirectory'],
         })
         if (result.canceled || result.filePaths.length === 0) return ''

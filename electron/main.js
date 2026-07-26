@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron')
 const path = require('path')
 
 function createWindow() {
@@ -16,7 +16,16 @@ function createWindow() {
     win.loadFile(path.join(__dirname, 'dist', 'index.html'))
 }
 
+// 注册选择对话框的 IPC 监听
+ipcMain.handle('show-open-dialog', async (event, options) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    return await dialog.showOpenDialog(win, options)
+})
+
 app.whenReady().then(() => {
+    // 隐藏/移除默认的菜单栏
+    Menu.setApplicationMenu(null)
+    
     createWindow()
 
     app.on('activate', () => {
