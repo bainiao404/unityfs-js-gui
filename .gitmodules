@@ -1,0 +1,3 @@
+[submodule "src/assets/unityfs-js"]
+	path = src/assets/unityfs-js
+	url = https://github.com/bainiao404/unityfs-js
