@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>AddressablesToolsJs 演示</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: system-ui, sans-serif;
+                max-width: 900px;
+                margin: 2rem auto;
+                padding: 0 1rem;
+            }
+
+            h1 {
+                color: #333;
+            }
+
+            .drop-zone {
+                border: 2px dashed #666;
+                padding: 2rem;
+                text-align: center;
+                border-radius: 8px;
+                background: #f8f9fa;
+                cursor: pointer;
+                margin: 1rem 0;
+            }
+
+            .drop-zone:hover,
+            .drop-zone.dragover {
+                background: #e9ecef;
+                border-color: #333;
+            }
+
+            #output {
+                white-space: pre-wrap;
+                font-family: monospace;
+                font-size: 12px;
+                background: #f5f5f5;
+                padding: 1rem;
+                border-radius: 4px;
+                max-height: 400px;
+                overflow: auto;
+            }
+
+            .error {
+                color: #c00;
+            }
+
+            .btn {
+                display: none;
+                padding: 8px 16px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                margin-top: 1rem;
+            }
+
+            .btn:hover {
+                background-color: #0056b3;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>AddressablesToolsJs</h1>
+        <p>解析 Unity Addressables 目录文件 (catalog.json 或 catalog.bin)</p>
+        <div class="drop-zone" id="dropZone">拖放文件到此处，或点击选择</div>
+        <input type="file" id="fileInput" accept=".json,.bin" style="display: none" />
+
+        <div>
+            <button id="downloadBtn" class="btn">下载解析后的 JSON 文件</button>
+        </div>
+
+        <h3>输出:</h3>
+        <pre id="output">请选择 catalog.json 或 catalog.bin 文件</pre>
+
+        <script type="module">
+            import { parse } from './src/index.js'
+
+            const dropZone = document.getElementById('dropZone')
+            const fileInput = document.getElementById('fileInput')
+            const output = document.getElementById('output')
+            const downloadBtn = document.getElementById('downloadBtn')
+
+            let parsedCatalog = null
+            let parsedFileName = ''
+
+            function handleFile(file) {
+                if (!file) return
+                output.textContent = '解析中...'
+                downloadBtn.style.display = 'none'
+                parsedCatalog = null
+                parsedFileName = ''
+
+                const reader = new FileReader()
+                const name = file.name.toLowerCase()
+                if (name.endsWith('.json')) {
+                    reader.onload = () => {
+                        try {
+                            const catalog = parse(reader.result)
+                            let text = `解析成功！\nLocatorId: ${catalog.LocatorId}\n`
+                            text += `资源数量: ${Object.keys(catalog.Resources).length}\n\n`
+                            let count = 0
+                            for (const [key, locs] of Object.entries(catalog.Resources)) {
+                                if (typeof key === 'string' && key.endsWith('.bundle') && count < 5) {
+                                    const res = locs[0]
+                                    const data = res.Data?.Object || res.Data
+                                    text += `Bundle: ${key}\n  Crc: ${data?.Crc ?? 'N/A'}, Hash: ${data?.Hash ?? 'N/A'}\n`
+                                    count++
+                                }
+                            }
+                            if (Object.keys(catalog.Resources).length > 5) text += '...\n'
+                            output.textContent = text
+
+                            parsedCatalog = catalog
+                            parsedFileName = file.name
+                            downloadBtn.style.display = 'inline-block'
+                        } catch (e) {
+                            output.innerHTML = `<span class="error">错误: ${e.message}\n${e.stack}</span>`
+                        }
+                    }
+                    reader.readAsText(file, 'utf-8')
+                } else if (name.endsWith('.bin')) {
+                    reader.onload = () => {
+                        try {
+                            const catalog = parse(reader.result)
+                            output.textContent = `解析成功！\nLocatorId: ${catalog.LocatorId}\n资源数量: ${Object.keys(catalog.Resources).length}`
+
+                            parsedCatalog = catalog
+                            parsedFileName = file.name
+                            downloadBtn.style.display = 'inline-block'
+                        } catch (e) {
+                            output.innerHTML = `<span class="error">错误: ${e.message}\n${e.stack}</span>`
+                        }
+                    }
+                    reader.readAsArrayBuffer(file)
+                } else {
+                    output.textContent = '请选择 .json 或 .bin 文件'
+                }
+            }
+
+            downloadBtn.addEventListener('click', () => {
+                if (!parsedCatalog) return
+                // Use a replacer function to avoid V8 string length limit by flattening dependency objects
+                const jsonString = JSON.stringify(
+                    parsedCatalog,
+                    (key, value) => {
+                        if (key === 'Dependencies' && Array.isArray(value)) {
+                            return value.map((dep) => {
+                                if (dep && typeof dep === 'object') {
+                                    return { PrimaryKey: dep.PrimaryKey }
+                                }
+                                return dep
+                            })
+                        }
+                        return value
+                    },
+                    2,
+                )
+                const blob = new Blob([jsonString], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = url
+                const baseName = parsedFileName.substring(0, parsedFileName.lastIndexOf('.')) || parsedFileName
+                link.download = `${baseName}_parsed.json`
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                URL.revokeObjectURL(url)
+            })
+
+            dropZone.addEventListener('click', () => fileInput.click())
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault()
+                dropZone.classList.add('dragover')
+            })
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'))
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault()
+                dropZone.classList.remove('dragover')
+                handleFile(e.dataTransfer.files[0])
+            })
+            fileInput.addEventListener('change', () => handleFile(fileInput.files[0]))
+        </script>
+    </body>
+</html>

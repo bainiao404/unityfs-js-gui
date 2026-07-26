@@ -1,0 +1,19 @@
+{
+    "name": "addressables-tools-js",
+    "version": "0.1.7",
+    "description": "JavaScript port of AddressablesTools for parsing Unity Addressables catalog files",
+    "main": "dist/AddressablesTools.js",
+    "module": "dist/AddressablesTools.esm.js",
+    "browser": "dist/AddressablesTools.umd.js",
+    "scripts": {
+        "demo": "npx serve ."
+    },
+    "type": "module",
+    "keywords": [
+        "unity",
+        "addressables",
+        "catalog",
+        "parser"
+    ],
+    "license": "MIT"
+}

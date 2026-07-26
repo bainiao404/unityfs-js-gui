@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "paths": {
+            "@/*": ["./src/*"]
+        },
+        "jsx": "preserve"
+    },
+    "include": [
+        "src/**/*",
+        "node_modules/tdesign-vue-next/global.d.ts",
+        "public/assetsVue/lz4-wasm",
+        "public/assetsVue/UnityJs-wasm/Wasm",
+        "public/assetsVue/SimpleSpine"
+    ]
+}

@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>LZMA-PureJS ES6 Browser Demo</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --bg-color: #0b0f19;
+                --card-bg: #161c2d;
+                --card-border: rgba(255, 255, 255, 0.08);
+                --primary: #00f2fe;
+                --primary-hover: #4facfe;
+                --accent: #10b981;
+                --accent-hover: #059669;
+                --text: #f3f4f6;
+                --text-muted: #9ca3af;
+                --error: #ef4444;
+                --glass: rgba(22, 28, 45, 0.7);
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: 'Outfit', sans-serif;
+                background-color: var(--bg-color);
+                color: var(--text);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem 1rem;
+                background-image:
+                    radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.05) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+            }
+
+            .container {
+                width: 100%;
+                max-width: 1200px;
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            header {
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                font-weight: 800;
+                background: linear-gradient(135deg, var(--primary), var(--accent));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-bottom: 0.5rem;
+                letter-spacing: -0.05em;
+            }
+
+            p.subtitle {
+                color: var(--text-muted);
+                font-size: 1.1rem;
+                font-weight: 300;
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            @media (min-width: 900px) {
+                .grid {
+                    grid-template-columns: 1fr 1fr;
+                }
+            }
+
+            .card {
+                background-color: var(--card-bg);
+                border: 1px solid var(--card-border);
+                border-radius: 16px;
+                padding: 1.5rem;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                transition:
+                    transform 0.2s,
+                    box-shadow 0.2s;
+            }
+
+            .card:hover {
+                box-shadow: 0 12px 40px rgba(0, 242, 254, 0.05);
+            }
+
+            h2 {
+                font-size: 1.25rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: var(--primary);
+            }
+
+            textarea {
+                width: 100%;
+                min-height: 150px;
+                background-color: rgba(0, 0, 0, 0.2);
+                border: 1px solid var(--card-border);
+                border-radius: 8px;
+                color: var(--text);
+                font-family: 'Fira Code', monospace;
+                font-size: 0.9rem;
+                padding: 1rem;
+                resize: vertical;
+                outline: none;
+                transition: border-color 0.2s;
+            }
+
+            textarea:focus {
+                border-color: var(--primary);
+            }
+
+            .presets {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .btn-preset {
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--card-border);
+                color: var(--text-muted);
+                padding: 0.4rem 0.8rem;
+                border-radius: 20px;
+                cursor: pointer;
+                font-size: 0.85rem;
+                transition: all 0.2s;
+            }
+
+            .btn-preset:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: var(--text);
+                border-color: var(--text-muted);
+            }
+
+            .actions {
+                display: flex;
+                gap: 1rem;
+            }
+
+            .btn {
+                flex: 1;
+                padding: 0.8rem 1.5rem;
+                border-radius: 8px;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 1rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                transition: all 0.2s;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+                color: #000;
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+            }
+
+            .btn-accent {
+                background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+                color: #fff;
+            }
+
+            .btn-accent:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            }
+
+            .stats {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+                margin-top: 0.5rem;
+            }
+
+            @media (min-width: 500px) {
+                .stats {
+                    grid-template-columns: repeat(4, 1fr);
+                }
+            }
+
+            .stat-box {
+                background-color: rgba(0, 0, 0, 0.2);
+                border: 1px solid var(--card-border);
+                border-radius: 8px;
+                padding: 0.75rem;
+                text-align: center;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                margin-bottom: 0.25rem;
+            }
+
+            .stat-value {
+                font-size: 1.2rem;
+                font-weight: 600;
+                font-family: 'Fira Code', monospace;
+            }
+
+            .stat-value.highlight {
+                color: var(--primary);
+            }
+
+            .console {
+                background-color: #070913;
+                border: 1px solid var(--card-border);
+                border-radius: 12px;
+                padding: 1rem;
+                font-family: 'Fira Code', monospace;
+                font-size: 0.85rem;
+                max-height: 200px;
+                overflow-y: auto;
+            }
+
+            .console-line {
+                margin-bottom: 0.4rem;
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .console-time {
+                color: var(--text-muted);
+                user-select: none;
+            }
+
+            .console-text.info {
+                color: var(--primary);
+            }
+
+            .console-text.success {
+                color: var(--accent);
+            }
+
+            .console-text.error {
+                color: var(--error);
+            }
+
+            .hex-view {
+                word-break: break-all;
+                background-color: rgba(0, 0, 0, 0.3);
+                border: 1px solid var(--card-border);
+                border-radius: 8px;
+                padding: 0.75rem;
+                font-family: 'Fira Code', monospace;
+                font-size: 0.8rem;
+                max-height: 100px;
+                overflow-y: auto;
+                color: var(--text-muted);
+            }
+
+            .file-input-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-top: 0.5rem;
+            }
+
+            .file-input-label {
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--card-border);
+                color: var(--text);
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 0.9rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                transition: all 0.2s;
+            }
+
+            .file-input-label:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-color: var(--text-muted);
+            }
+
+            #file-input {
+                display: none;
+            }
+
+            #file-name {
+                font-size: 0.9rem;
+                color: var(--text-muted);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .badge {
+                padding: 0.2rem 0.5rem;
+                border-radius: 4px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                align-self: flex-start;
+            }
+
+            .badge-success {
+                background-color: rgba(16, 185, 129, 0.2);
+                color: var(--accent);
+                border: 1px solid rgba(16, 185, 129, 0.3);
+            }
+
+            .badge-error {
+                background-color: rgba(239, 68, 68, 0.2);
+                color: var(--error);
+                border: 1px solid rgba(239, 68, 68, 0.3);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>LZMA-PureJS ES6</h1>
+                <p class="subtitle">High Performance Native Browser LZMA Compression & Decompression Demo</p>
+            </header>
+
+            <div class="grid">
+                <!-- Input Panel -->
+                <div class="card">
+                    <h2>Input Source Data</h2>
+                    <textarea id="input-text" placeholder="Type or paste text here to compress...">
+LZMA-PureJS has been fully modernized to a pure ES6 Module package!
+No dependencies, zero config, platform-agnostic, and fully compatible with modern bundlers and native browser imports.
+Try modifying this text or select a preset to see the real-time compression ratio and decompression matching verification.</textarea
+                    >
+
+                    <div class="presets">
+                        <button
+                            class="btn-preset"
+                            data-text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                        >
+                            Lorem Ipsum
+                        </button>
+                        <button class="btn-preset" id="json-preset">Large JSON</button>
+                        <button class="btn-preset" id="code-preset">Source Code</button>
+                    </div>
+
+                    <div class="file-input-wrapper">
+                        <label class="file-input-label" for="file-input">
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            Choose Binary File
+                        </label>
+                        <input type="file" id="file-input" />
+                        <span id="file-name">No file chosen</span>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn btn-primary" id="btn-compress">
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="8 17 12 21 16 17"></polyline>
+                                <line x1="12" y1="12" x2="12" y2="21"></line>
+                                <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path>
+                            </svg>
+                            Compress (LZMA)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Output / Result Panel -->
+                <div class="card">
+                    <h2>Decompression & Results</h2>
+                    <textarea
+                        id="output-text"
+                        readonly
+                        placeholder="Decompressed result will appear here..."
+                    ></textarea>
+
+                    <div>
+                        <span class="stat-label">Compressed Output Hex View:</span>
+                        <div class="hex-view" id="hex-view">00 00 00 ...</div>
+                    </div>
+
+                    <div class="stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Original</div>
+                            <div class="stat-value" id="stat-orig">0 B</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Compressed</div>
+                            <div class="stat-value" id="stat-comp">0 B</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Ratio</div>
+                            <div class="stat-value highlight" id="stat-ratio">0%</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Speed</div>
+                            <div class="stat-value" id="stat-speed">0 ms</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center">
+                        <span id="status-badge" class="badge" style="display: none"></span>
+                        <button
+                            class="btn btn-accent"
+                            id="btn-decompress"
+                            disabled
+                            style="max-width: 200px; padding: 0.5rem 1rem; font-size: 0.9rem"
+                        >
+                            Decompress File
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Console -->
+            <div class="card" style="margin-top: 1rem">
+                <h2>Execution Console Log</h2>
+                <div class="console" id="console"></div>
+            </div>
+        </div>
+
+        <script type="module">
+            import lzmajs from './main.js'
+
+            // DOM Elements
+            const inputText = document.getElementById('input-text')
+            const outputText = document.getElementById('output-text')
+            const btnCompress = document.getElementById('btn-compress')
+            const btnDecompress = document.getElementById('btn-decompress')
+            const fileInput = document.getElementById('file-input')
+            const fileNameSpan = document.getElementById('file-name')
+            const consoleDiv = document.getElementById('console')
+            const hexView = document.getElementById('hex-view')
+            const statOrig = document.getElementById('stat-orig')
+            const statComp = document.getElementById('stat-comp')
+            const statRatio = document.getElementById('stat-ratio')
+            const statSpeed = document.getElementById('stat-speed')
+            const statusBadge = document.getElementById('status-badge')
+
+            let compressedBuffer = null
+            let inputBytes = null
+
+            // Helper: log to console panel
+            function log(message, type = 'info') {
+                const timeStr = new Date().toLocaleTimeString()
+                const line = document.createElement('div')
+                line.className = 'console-line'
+
+                const timeSpan = document.createElement('span')
+                timeSpan.className = 'console-time'
+                timeSpan.textContent = `[${timeStr}]`
+
+                const textSpan = document.createElement('span')
+                textSpan.className = `console-text ${type}`
+                textSpan.textContent = message
+
+                line.appendChild(timeSpan)
+                line.appendChild(textSpan)
+                consoleDiv.appendChild(line)
+                consoleDiv.scrollTop = consoleDiv.scrollHeight
+            }
+
+            log('LZMA-PureJS ES6 Module successfully loaded in browser environment.', 'success')
+
+            // Preset click events
+            document.querySelectorAll('.btn-preset').forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    const text = e.target.getAttribute('data-text')
+                    if (text) {
+                        inputText.value = text
+                        log('Preset text loaded.')
+                        resetStats()
+                    }
+                })
+            })
+
+            document.getElementById('json-preset').addEventListener('click', () => {
+                const jsonStr = JSON.stringify(
+                    {
+                        name: 'UnityJS-GUI Project',
+                        description: 'Modernized high performance frontend stack for Unity WebGL integrations',
+                        version: '1.0.0',
+                        dependencies: {
+                            vue: '^3.3.0',
+                            'lzma-purejs-es6': '0.9.0',
+                        },
+                        features: [
+                            'ES6 module support',
+                            'Pure JavaScript fallback',
+                            'Platform agnostic',
+                            'Zero native Node dependencies',
+                        ],
+                        matrix: Array.from({ length: 10 }, (_, i) => ({ id: i, value: Math.random(), active: true })),
+                    },
+                    null,
+                    2,
+                )
+                inputText.value = jsonStr
+                log('JSON preset loaded.')
+                resetStats()
+            })
+
+            document.getElementById('code-preset').addEventListener('click', () => {
+                inputText.value = `// LZMA-PureJS ES6 Module Export
+import freeze from './lib/freeze.js';
+import LZMA from './lib/LZMA.js';
+import Util from './lib/Util.js';
+
+export const compress = Util.compress;
+export const decompress = Util.decompress;
+
+export default freeze({
+  compress: Util.compress,
+  decompress: Util.decompress,
+  version: "0.9.0"
+});`
+                log('Code preset loaded.')
+                resetStats()
+            })
+
+            function resetStats() {
+                statOrig.textContent = '0 B'
+                statComp.textContent = '0 B'
+                statRatio.textContent = '0%'
+                statSpeed.textContent = '0 ms'
+                hexView.textContent = '00 00 00 ...'
+                statusBadge.style.display = 'none'
+                btnDecompress.disabled = true
+                compressedBuffer = null
+            }
+
+            // Helper: Buffer to Hex string
+            function toHexString(byteArray) {
+                return Array.from(byteArray, function (byte) {
+                    return ('0' + (byte & 0xff).toString(16)).slice(-2)
+                })
+                    .join(' ')
+                    .toUpperCase()
+            }
+
+            // File Upload Handler
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0]
+                if (!file) return
+                fileNameSpan.textContent = file.name
+
+                const reader = new FileReader()
+                reader.onload = function (evt) {
+                    inputBytes = new Uint8Array(evt.target.result)
+                    log(`Binary file "${file.name}" loaded (${inputBytes.length} bytes). Ready to compress.`, 'info')
+                    resetStats()
+                    statOrig.textContent = `${inputBytes.length} B`
+                }
+                reader.readAsArrayBuffer(file)
+            })
+
+            // Compression Action
+            btnCompress.addEventListener('click', () => {
+                try {
+                    // Retrieve source bytes
+                    if (!inputBytes || fileInput.files.length === 0) {
+                        const text = inputText.value
+                        inputBytes = new TextEncoder().encode(text)
+                    }
+
+                    log(`Starting compression of ${inputBytes.length} bytes...`, 'info')
+                    const startTime = performance.now()
+
+                    // Execute compression
+                    const compressed = lzmajs.compressFile(inputBytes)
+
+                    const endTime = performance.now()
+                    const duration = (endTime - startTime).toFixed(1)
+
+                    compressedBuffer = compressed
+
+                    // Stats calculations
+                    const origSize = inputBytes.length
+                    const compSize = compressed.length
+                    const ratio = ((1 - compSize / origSize) * 100).toFixed(1)
+
+                    statOrig.textContent = `${origSize} B`
+                    statComp.textContent = `${compSize} B`
+                    statRatio.textContent = `${ratio}%`
+                    statSpeed.textContent = `${duration} ms`
+
+                    // Hex display (limit to first 128 bytes)
+                    const hexDisplay =
+                        compressed.length > 128
+                            ? toHexString(compressed.slice(0, 128)) + ' ...'
+                            : toHexString(compressed)
+                    hexView.textContent = hexDisplay
+
+                    log(
+                        `Successfully compressed in ${duration}ms! Ratio: ${ratio}% (original: ${origSize}B, compressed: ${compSize}B)`,
+                        'success',
+                    )
+
+                    btnDecompress.disabled = false
+                    statusBadge.style.display = 'none'
+                } catch (err) {
+                    log(`Compression failed: ${err.message}`, 'error')
+                    console.error(err)
+                }
+            })
+
+            // Decompression Action
+            btnDecompress.addEventListener('click', () => {
+                if (!compressedBuffer) return
+                try {
+                    log(`Starting decompression of ${compressedBuffer.length} bytes...`, 'info')
+                    const startTime = performance.now()
+
+                    // Execute decompression
+                    const decompressed = lzmajs.decompressFile(compressedBuffer)
+
+                    const endTime = performance.now()
+                    const duration = (endTime - startTime).toFixed(1)
+
+                    // Verification
+                    let match = true
+                    if (inputBytes.length !== decompressed.length) {
+                        match = false
+                    } else {
+                        for (let i = 0; i < inputBytes.length; i++) {
+                            if (inputBytes[i] !== decompressed[i]) {
+                                match = false
+                                break
+                            }
+                        }
+                    }
+
+                    // Show text output if original was text
+                    if (fileInput.files.length === 0) {
+                        outputText.value = new TextDecoder().decode(decompressed)
+                    } else {
+                        outputText.value = `[Decompressed Binary Data: ${decompressed.length} bytes]`
+                    }
+
+                    statusBadge.style.display = 'inline-block'
+                    if (match) {
+                        statusBadge.textContent = 'Success: Output Matches Original'
+                        statusBadge.className = 'badge badge-success'
+                        log(`Successfully decompressed in ${duration}ms! Verification passed.`, 'success')
+                    } else {
+                        statusBadge.textContent = 'Error: Data Mismatch'
+                        statusBadge.className = 'badge badge-error'
+                        log(`Decompression verification failed. Data mismatch.`, 'error')
+                    }
+                } catch (err) {
+                    log(`Decompression failed: ${err.message}`, 'error')
+                    console.error(err)
+                }
+            })
+        </script>
+    </body>
+</html>

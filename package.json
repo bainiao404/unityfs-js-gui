@@ -1,0 +1,47 @@
+{
+    "name": "unityfs-gui",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "postinstall": "node scripts/install-electron.cjs",
+        "dev": "vite",
+        "build": "vite build --mode web",
+        "build:web": "vite build --mode web",
+        "build:electron": "vite build --mode electron && node scripts/build-electron.cjs",
+        "build:cordova": "cross-env VITE_PLATFORM=cordova vite build --mode cordova && node scripts/build-cordova.cjs",
+        "build:bainiaogkd": "vite build && rimraf ..\\..\\app\\UnityJs_GUI\\www\\assetsVue && xcopy dist ..\\..\\app\\UnityJs_GUI\\www\\ /E /I /Y",
+        "preview": "vite preview",
+        "lint": "eslint . --fix",
+        "format": "prettier --write src/"
+    },
+    "dependencies": {
+        "@alenaksu/json-viewer": "^2.1.2",
+        "crypto-js": "^4.2.0",
+        "electron": "25.4.0",
+        "jszip": "^3.10.1",
+        "monaco-editor": "^0.55.1",
+        "pinia": "^3.0.3",
+        "tdesign-vue-next": "^1.16.1",
+        "three": "^0.184.0",
+        "vue": "^3.5.13",
+        "vue-router": "^4.5.0",
+        "vue-virtual-scroller": "^2.0.0-beta.8"
+    },
+    "devDependencies": {
+        "@electron/get": "^2.0.3",
+        "@eslint/js": "^9.22.0",
+        "@vitejs/plugin-vue": "^5.2.3",
+        "@vue/eslint-config-prettier": "^10.2.0",
+        "cross-env": "^7.0.3",
+        "eslint": "^9.22.0",
+        "eslint-plugin-vue": "~10.0.0",
+        "extract-zip": "^2.0.1",
+        "fs-extra": "^11.2.0",
+        "globals": "^16.0.0",
+        "prettier": "3.5.3",
+        "vite": "^6.2.4",
+        "vite-plugin-static-copy": "^3.1.0",
+        "vite-plugin-vue-devtools": "^7.7.2"
+    }
+}

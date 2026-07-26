@@ -1,0 +1,164 @@
+/* Industrial Software Theme Stylesheet - Light Theme Override */
+
+:root {
+    /* Square corners and sharp geometric widgets */
+    --td-radius-small: 0px !important;
+    --td-radius-default: 0px !important;
+    --td-radius-medium: 0px !important;
+    --td-radius-large: 0px !important;
+    --td-radius-extra-large: 0px !important;
+    --td-radius-round: 0px !important;
+
+    /* Flat layouts: Remove all blurs, glowing drop shadows, and gradients */
+    --td-shadow-1: none !important;
+    --td-shadow-2: none !important;
+    --td-shadow-3: none !important;
+    --td-shadow-active: none !important;
+    --td-shadow-inset: none !important;
+
+    /* Light Industrial Color Palette */
+    --td-bg-color-page: #f5f7fa !important; /* Light gray base background */
+    --td-bg-color-container: #ffffff !important; /* Pure white panel backgrounds */
+    --td-bg-color-secondarycontainer: #f0f2f5 !important;
+    --td-bg-color-component: #eef1f6 !important; /* Solid light gray items */
+    --td-bg-color-component-hover: #e0e5ee !important;
+    --td-bg-color-component-active: #d0d7e5 !important;
+
+    /* Text colors: High-contrast slate and charcoal */
+    --td-text-color-primary: #212529 !important;
+    --td-text-color-secondary: #495057 !important;
+    --td-text-color-placeholder: #adb5bd !important;
+
+    /* Border colors: Thin, visible, solid grid lines */
+    --td-component-border: #dcdfe6 !important;
+    --td-component-stroke: #dcdfe6 !important;
+    --td-border-color-disabled: #e4e7ed !important;
+
+    /* Accent color: Deep steel blue */
+    --td-brand-color: #0052d9 !important;
+    --td-brand-color-hover: #0044b3 !important;
+    --td-brand-color-active: #00368f !important;
+    --td-brand-color-light: #f0f5ff !important;
+}
+
+/* Eliminate browser notch/safe area margins - Mobile full bleed */
+html,
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    background-color: var(--td-bg-color-page) !important;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* App viewport shell reset */
+#app {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Rigid solid borders on cards, buttons, tabs, dialogs */
+.t-card,
+.t-button,
+.t-input,
+.t-textarea,
+.t-select,
+.t-dialog,
+.t-tabs,
+.t-radio-button,
+.t-checkbox,
+.t-loading,
+.t-progress,
+.t-tag {
+    border-radius: 0px !important;
+    box-shadow: none !important;
+}
+
+/* Tab Header Solid Border Styling */
+.t-tabs__nav-container {
+    border-bottom: 1px solid var(--td-component-border) !important;
+}
+.t-tabs__nav-item {
+    border-radius: 0px !important;
+    margin-right: 0px !important;
+    border: 1px solid transparent !important;
+}
+.t-tabs__nav-item.t-is-active {
+    background-color: var(--td-bg-color-container) !important;
+    border-color: var(--td-component-border) var(--td-component-border) transparent var(--td-component-border) !important;
+}
+
+/* Remove Glassmorphic Filters globally */
+* {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+/* Scrollbars: Compact Industrial Style */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 0px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Code & File Path Typography */
+.monospace-text,
+.log-console,
+.log-line,
+.file-path-col,
+.asset-item-path {
+    font-family: 'Cascadia Code', Consolas, Monaco, 'Courier New', Courier, monospace !important;
+}
+
+/* Industrial Navigation Bar & Menu Styles */
+.top-nav-bar .t-button {
+    height: 24px !important;
+    padding: 0 12px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: var(--td-text-color-secondary) !important;
+    border-radius: 0px !important;
+    margin: 0 2px !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.top-nav-bar .t-button:hover {
+    background-color: var(--td-bg-color-component-hover) !important;
+    color: var(--td-text-color-primary) !important;
+}
+
+.top-nav-bar .t-button--variant-text {
+    background: transparent !important;
+}
+
+/* Flat Forms & Fields Custom Overrides */
+.t-input,
+.t-input-number,
+.t-select,
+.t-textarea {
+    border: 1px solid var(--td-component-border) !important;
+    background-color: var(--td-bg-color-container) !important;
+}
+
+.t-input.t-is-focused,
+.t-input-number.t-is-focused,
+.t-select.t-is-focused,
+.t-textarea:focus {
+    border-color: var(--td-brand-color) !important;
+}
