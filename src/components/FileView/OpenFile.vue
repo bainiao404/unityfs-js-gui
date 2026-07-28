@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="open-file-viewport">
         <div class="split-container">
             <!-- Sidebar Navigation -->
@@ -273,12 +273,12 @@
 
         <CordovaFileView
             v-if="platform.isCordova"
-            :title="platform.cordovaOpenType === 'folder' ? i18nStore.t('addFolder') : i18nStore.t('addFile')"
+            :title="platform.cordovaOpenType.value === 'folder' ? i18nStore.t('addFolder') : i18nStore.t('addFile')"
             :open-path="openPath"
-            :display="platform.cordovaFileViewVisible"
-            :only-folder="platform.cordovaOpenType === 'folder'"
+            :display="platform.cordovaFileViewVisible.value"
+            :only-folder="platform.cordovaOpenType.value === 'folder'"
             @select="onOpenFileCordova"
-            @close="platform.cordovaFileViewVisible = false"
+            @close="closeCordovaFileView"
         />
     </div>
 </template>
@@ -351,6 +351,13 @@ function onOpenFileCordova(selection) {
 
     if (typeof platform.resolveSelection === 'function') {
         platform.resolveSelection(selection)
+    }
+}
+
+function closeCordovaFileView() {
+    platform.cordovaFileViewVisible.value = false
+    if (typeof platform.resolveSelection === 'function') {
+        platform.resolveSelection(null)
     }
 }
 

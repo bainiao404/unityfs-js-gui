@@ -8,8 +8,8 @@
     "include": [
         "src/**/*",
         "node_modules/tdesign-vue-next/global.d.ts",
-        "public/assetsVue/lz4-wasm",
-        "public/assetsVue/UnityJs-wasm/Wasm",
-        "public/assetsVue/SimpleSpine"
+        "public/assets/lz4-wasm",
+        "public/assets/UnityJs-wasm/Wasm",
+        "public/assets/SimpleSpine"
     ]
 }

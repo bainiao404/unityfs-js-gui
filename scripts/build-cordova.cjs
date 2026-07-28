@@ -2,14 +2,14 @@ const fs = require('fs-extra')
 const path = require('path')
 
 async function main() {
-    const srcDist = path.join(__dirname, '..', 'dist', 'cordova')
-    const destApp = path.join(__dirname, '..', 'cordova', 'www')
+    const srcDist = path.join(__dirname, '..', 'dist', 'web')
+    const destApp = path.join(__dirname, '..', 'cordova', 'www', 'app', 'unityfs_js_gui', 'www')
 
-    console.log('[Build Cordova] Clearing old www resources...')
+    console.log('[Build Cordova] Clearing old www sub-app resources...')
     await fs.remove(destApp)
     await fs.ensureDir(destApp)
 
-    console.log('[Build Cordova] Copying compiled files to cordova/www...')
+    console.log('[Build Cordova] Copying compiled files to cordova/www/app/unityfs_js_gui/www...')
     await fs.copy(srcDist, destApp)
 
     console.log('[Build Cordova] Cordova www assets synchronized successfully!')

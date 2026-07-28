@@ -1,4 +1,4 @@
-﻿import { ref, computed, readonly, watch, reactive } from 'vue'
+import { ref, computed, readonly, watch, reactive } from 'vue'
 import { defineStore } from 'pinia'
 import { useLayerStore } from '@/layer-system/layerStore'
 export const useCounterStore = defineStore('counter', () => {
@@ -146,7 +146,11 @@ export const AppData = defineStore('appData', () => {
 
     // Save config to localStorage
     function saveConfig() {
-        localStorage.setItem('unityfs-gui-config', JSON.stringify(config.data))
+        try {
+            localStorage.setItem('unityfs-gui-config', JSON.stringify(config.data))
+        } catch (err) {
+            console.warn('localStorage setItem failed:', err)
+        }
     }
 
     // 5. spineView

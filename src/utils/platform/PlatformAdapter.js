@@ -1,4 +1,4 @@
-﻿export class PlatformAdapter {
+export class PlatformAdapter {
     get isElectron() {
         return false
     }
@@ -55,6 +55,25 @@
      * @param {string} filePath
      */
     openInExplorer(filePath) {
+        // NOP on non-desktop platforms
+    }
+
+    /**
+     * 准备进行原生文件拖拽，将指定资源导出至临时目录
+     * @param {Object} item 拖拽的当前项
+     * @param {Array<Object>} itemsToExport 所有需要导出的项
+     * @param {Object} config 配置参数 (如 spriteCutting 等)
+     * @returns {Promise<string[]>} 临时文件路径数组
+     */
+    async prepareDragOut(item, itemsToExport, config) {
+        return []
+    }
+
+    /**
+     * 触发原生文件拖拽起始行为
+     * @param {string[]} tempFilePaths 导出的临时文件物理路径数组
+     */
+    startDragOut(tempFilePaths) {
         // NOP on non-desktop platforms
     }
 }

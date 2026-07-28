@@ -69,8 +69,8 @@
             v-if="isCordova"
             :title="i18nStore.t('selectExportFolder')"
             @select="onOpenFileCordova"
-            :display="cordovaFileView"
-            @close="cordovaFileView = false"
+            :display="platform.cordovaFileViewVisible.value"
+            @close="closeCordovaFileView"
             :onlyFolder="true"
             :multiple="false"
         ></cordova-file-view>
@@ -80,32 +80,34 @@
 <script setup>
 import { AppData } from '@/stores/counter'
 import CordovaFileView from '../Class/CordovaFileView/CordovaFileView.vue'
-import { ref } from 'vue'
 import { useI18nStore } from '@/stores/i18n'
+import { platform } from '@/utils/platform'
 
 const appData = AppData()
 const i18nStore = useI18nStore()
-const isCordova = !!window.cordova
-const isElectron = !!window.__dirname
-const cordovaFileView = ref(false)
+const isCordova = platform.isCordova
+const isElectron = platform.isElectron
 
-function onOpenFileCordova(path) {
-    appData.config.data.lastDefaultSavedDirectory = path.path
+function onOpenFileCordova(selection) {
+    if (typeof platform.resolveSelection === 'function') {
+        platform.resolveSelection(selection)
+    }
+}
+
+function closeCordovaFileView() {
+    if (typeof platform.resolveSelection === 'function') {
+        platform.resolveSelection(null)
+    }
 }
 
 async function setExportDir() {
-    if (window.__dirname) {
-        const electron = window.require ? window.require('electron') : null
-        if (electron && electron.ipcRenderer) {
-            const result = await electron.ipcRenderer.invoke('show-open-dialog', {
-                properties: ['openDirectory'],
-            })
-            if (!result.canceled && result.filePaths.length > 0) {
-                appData.config.data.lastDefaultSavedDirectory = result.filePaths[0].replace(/\\/g, '/') + '/'
-            }
+    try {
+        const path = await platform.selectDirectory()
+        if (path) {
+            appData.config.data.lastDefaultSavedDirectory = path
         }
-    } else if (window.cordova) {
-        cordovaFileView.value = true
+    } catch (err) {
+        console.error('Failed to select directory:', err)
     }
 }
 </script>

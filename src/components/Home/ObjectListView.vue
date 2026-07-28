@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="container">
         <!-- 顶部筛选与搜索栏 -->
         <div class="top-section">
@@ -115,17 +115,9 @@ import { UnityFSGui } from '@/assets/unityfs-gui'
 import { AppData } from '@/stores/counter'
 import { MessagePlugin } from 'tdesign-vue-next'
 import { RecycleScroller } from 'vue-virtual-scroller'
+import { platform } from '@/utils/platform'
 import LoadProgressCard from '../Class/LoadProgressCard.vue'
 import SingleFileExporter from '../FileView/SingleFileExporter.vue'
-
-// 环境及 Electron API 初始化
-const ENV = {
-    isElectron: !!window.__dirname || (window.process && window.process.versions.electron),
-}
-const fs = window.require ? window.require('fs') : null
-const path = window.require ? window.require('path') : null
-const os = window.require ? window.require('os') : null
-const { ipcRenderer } = window.require && ENV.isElectron ? window.require('electron') : {}
 
 const dragFilePromise = ref(null)
 const currentDraggingItem = ref(null)
@@ -417,7 +409,7 @@ function clickMore(item) {
 }
 
 const handleItemMouseDown = (item) => {
-    if (!ENV.isElectron || !fs || !path || !os) return
+    if (!platform.isElectron) return
 
     currentDraggingItem.value = item
 
@@ -427,94 +419,11 @@ const handleItemMouseDown = (item) => {
     const isDragSelection = selectedItems.length > 0 && selectedItems.some((i) => i.viewId === item.viewId)
     const itemsToExport = isDragSelection ? selectedItems : [item]
 
-    dragFilePromise.value = (async () => {
-        try {
-            const tempDir = path.join(os.tmpdir(), 'UnityJS-GUI-DragExport')
-            if (!fs.existsSync(tempDir)) {
-                fs.mkdirSync(tempDir, { recursive: true })
-            }
-
-            const exportPromises = itemsToExport.map(async (currentItem) => {
-                const assetManager = await UnityFSGui.assetManagers.get(currentItem.assetManagerId)
-                const object = currentItem.pathID
-                    ? assetManager.getObjectInfoByPathId(BigInt(currentItem.pathID))
-                    : assetManager.getObjectInfos()?.[currentItem.objectId]
-
-                if (!object) return null
-
-                let rawData
-                let fileName = object.name
-
-                const exportConfig = {
-                    type: 'arrayBuffer',
-                    worker: true,
-                    cutting: object.className === 'Sprite' ? appData.config.data.spriteCutting : false,
-                }
-
-                const fileInfo = await assetManager.exportFile(object, exportConfig)
-                if (fileInfo && fileInfo.isFolder) {
-                    const modelTempPaths = []
-                    for (const [subPath, subData] of Object.entries(fileInfo.files)) {
-                        const tempFilePath = path.join(tempDir, fileInfo.name, subPath)
-                        const fileDir = path.dirname(tempFilePath)
-                        if (!fs.existsSync(fileDir)) {
-                            fs.mkdirSync(fileDir, { recursive: true })
-                        }
-                        const bufferData = subData instanceof Uint8Array
-                            ? Buffer.from(subData.buffer, subData.byteOffset, subData.byteLength)
-                            : Buffer.from(subData)
-                        fs.writeFileSync(tempFilePath, bufferData)
-                        modelTempPaths.push(tempFilePath)
-                    }
-                    return modelTempPaths
-                }
-
-                if (!fileInfo || (!fileInfo.data && !fileInfo.data?.raw)) {
-                    const reader = object._reader
-                    if (reader) {
-                        const currentOffset = reader.offset
-                        reader.seek(object.offset)
-                        rawData = reader.read(object.size)
-                        reader.seek(currentOffset)
-                        const ext = object.object?.exportExtension || '.dat'
-                        if (!fileName.includes('.') && ext) {
-                            fileName += ext
-                        }
-                    }
-                } else {
-                    rawData = fileInfo?.data?.raw
-                    fileName = fileInfo.src.split(/[\\/]/).pop()
-                }
-
-                if (!rawData) return null
-
-                const tempFilePath = path.join(tempDir, fileName)
-
-                let bufferData
-                if (rawData instanceof Uint8Array) {
-                    bufferData = Buffer.from(rawData.buffer, rawData.byteOffset, rawData.byteLength)
-                } else if (rawData instanceof ArrayBuffer) {
-                    bufferData = Buffer.from(rawData)
-                } else {
-                    bufferData = Buffer.from(rawData)
-                }
-
-                fs.writeFileSync(tempFilePath, bufferData)
-                return tempFilePath
-            })
-
-            const exportedPathsResults = await Promise.all(exportPromises)
-            const exportedPaths = exportedPathsResults.flat().filter(Boolean)
-            return exportedPaths
-        } catch (e) {
-            console.error('Pre-export failed:', e)
-            return []
-        }
-    })()
+    dragFilePromise.value = platform.prepareDragOut(item, itemsToExport, appData.config.data)
 }
 
 const handleDragStart = async (event, item) => {
-    if (!ENV.isElectron || !ipcRenderer) return
+    if (!platform.isElectron) return
 
     event.preventDefault()
     isNativeDragging.value = true
@@ -532,21 +441,7 @@ const handleDragStart = async (event, item) => {
     }
 
     if (tempFilePaths && tempFilePaths.length > 0) {
-        const iconPath = path && window.__dirname ? path.join(window.__dirname, 'Export.png') : ''
-
-        if (tempFilePaths.length === 1) {
-            ipcRenderer.send('ondragstart', {
-                filePath: tempFilePaths[0],
-                iconPath: iconPath,
-                iconSize: { width: 32, height: 32 },
-            })
-        } else {
-            ipcRenderer.send('ondragstart', {
-                filePaths: tempFilePaths,
-                iconPath: iconPath,
-                iconSize: { width: 32, height: 32 },
-            })
-        }
+        platform.startDragOut(tempFilePaths)
     }
 }
 

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div style="position: absolute; width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden">
         <div class="export-container">
             <t-space direction="vertical" size="large" style="width: 100%">
@@ -129,8 +129,8 @@
                 v-if="platform.isCordova"
                 :title="i18nStore.t('exportSelectFolderTitle')"
                 @select="onOpenFileCordova"
-                :display="platform.cordovaFileViewVisible"
-                @close="platform.cordovaFileViewVisible = false"
+                :display="platform.cordovaFileViewVisible.value"
+                @close="closeCordovaFileView"
                 :onlyFolder="true"
                 :multiple="false"
             />
@@ -212,6 +212,13 @@ function onOpenFileCordova(selection) {
     }
     if (typeof platform.resolveSelection === 'function') {
         platform.resolveSelection(selection)
+    }
+}
+
+function closeCordovaFileView() {
+    platform.cordovaFileViewVisible.value = false
+    if (typeof platform.resolveSelection === 'function') {
+        platform.resolveSelection(null)
     }
 }
 

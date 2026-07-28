@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
     if (mode === 'web') {
         outDir = 'dist/web'
     } else if (mode === 'electron') {
-        outDir = 'dist/electron/resources/app/dist'
+        outDir = 'dist/electron/resources/app/www'
     } else if (mode === 'cordova') {
         outDir = 'dist/cordova'
     }
@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => {
         },
         build: {
             outDir: outDir,
-            assetsDir: 'assetsVue',
+            assetsDir: 'assets',
             // 开启 source map 生产环境生成
             sourcemap: true,
         },

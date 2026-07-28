@@ -1,4 +1,4 @@
-﻿/**
+/**
  * GKD JS v0.2 文件下载管理模块。
  * 处理文件并发下载、重试逻辑、下载任务队列调度以及本地缓存文件校验。
  */
@@ -312,7 +312,11 @@ export class SingleTask {
         this.fileQueue
             .filter((f) => f.state === FILE_STATE.SAVED || f.state === FILE_STATE.LOCAL_EXIST)
             .forEach((f) => this.cache.set(hash(f.url)))
-        localStorage.setItem('gkDownload', JSON.stringify(this.cache.dump()))
+        try {
+            localStorage.setItem('gkDownload', JSON.stringify(this.cache.dump()))
+        } catch (e) {
+            console.warn('localStorage setItem failed:', e)
+        }
     }
 }
 
@@ -402,7 +406,13 @@ export const downloadFile = {
     addTasks: () => defaultPool,
     pauseTask: () => defaultPool.pause(),
     resumeTask: () => defaultPool.resume(),
-    delMemory: () => localStorage.removeItem('gkDownload'),
+    delMemory: () => {
+        try {
+            localStorage.removeItem('gkDownload')
+        } catch (e) {
+            console.warn('localStorage removeItem failed:', e)
+        }
+    },
     generateRandomId: randId,
     /* 透传配置 */
     maxProcess: 6,

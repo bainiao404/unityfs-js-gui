@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div v-show="display" class="file-explorer-container">
         <div class="header">
             <div class="header-content">
@@ -158,7 +158,13 @@ function getFile(path) {
                     path: e.nativeURL || path + e.name,
                     type: e.isFile ? 'file' : 'folder',
                 }))
+        }, (error) => {
+            console.error("readEntries error:", error);
+            MessagePlugin.error("读取目录内容失败: " + JSON.stringify(error));
         })
+    }, (error) => {
+        console.error("resolveLocalFileSystemURL error:", error);
+        MessagePlugin.error("读取目录失败: " + JSON.stringify(error));
     })
 }
 
