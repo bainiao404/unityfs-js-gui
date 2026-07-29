@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="data-viewer-container">
         <t-loading :loading="loading" show-overlay size="small" class="h-100 w-100">
             <div class="custom-tabs-layout">
@@ -148,9 +148,9 @@
 </template>
 
 <script setup>
-import JsonViewerMonaco from './tools/JsonViewerMonaco.vue'
-import { UnityFSGui } from '@/assets/unityfs-gui'
-import { onMounted, ref, nextTick } from 'vue'
+import JsonViewerMonaco from '../tools/JsonViewerMonaco.vue'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
+import { onMounted, ref, nextTick, onBeforeUnmount } from 'vue'
 
 const props = defineProps(['assetManagerId', 'objectId'])
 const loading = ref(true)
@@ -256,7 +256,8 @@ async function start() {
                                 const texObjectInfo = assetManager.getObjectInfoByPathId(BigInt(texPtr.pathID))
                                 if (texObjectInfo) {
                                     const texFileInfo = await assetManager.exportFile(texObjectInfo, {
-                                        type: 'dataURL',
+                                        type: 'blobURL',
+                                        worker: true,
                                     })
                                     if (texFileInfo && texFileInfo.data && texFileInfo.data.raw) {
                                         texItem.value.src = texFileInfo.data.raw
@@ -274,8 +275,9 @@ async function start() {
         }
 
         // Raw JSON dump
+        const info = await scriptObj.getInfo()
         rawJson.value = JSON.parse(
-            JSON.stringify(scriptObj, (key, value) => {
+            JSON.stringify(info, (key, value) => {
                 if (typeof value === 'bigint') {
                     return value.toString()
                 }
@@ -291,6 +293,15 @@ async function start() {
 
 onMounted(() => {
     nextTick(start)
+})
+
+onBeforeUnmount(() => {
+    // Revoke all texture Blob URLs to release memory
+    textures.value.forEach((tex) => {
+        if (tex.src && tex.src.startsWith('blob:')) {
+            URL.revokeObjectURL(tex.src)
+        }
+    })
 })
 </script>
 

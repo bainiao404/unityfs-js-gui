@@ -1,4 +1,4 @@
-﻿import { UnityFSGui } from '@/assets/unityfs-gui'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
 import { platform } from '@/utils/platform'
 import { ExportTaskExecutor } from './ExportTaskExecutor'
 import JSZip from 'jszip'

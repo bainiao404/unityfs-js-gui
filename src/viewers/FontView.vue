@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="data-viewer-container">
         <t-loading :loading="loading" show-overlay size="small" class="h-100 w-100">
             <div class="content-wrapper scrollable-content">
@@ -34,7 +34,7 @@
                                 {{ previewText || '白鸟GKD - Unity 字体查看器 (1234567890 ABCDEF abcdef)' }}
                             </div>
                             <div v-else class="fallback-warning-panel">
-                                <div class="fallback-icon">⚠️</div>
+                                <div class="fallback-icon">!</div>
                                 <div class="fallback-text">
                                     <h4>未检出内嵌字体文件数据</h4>
                                     <p>该资产可能为位图字体或自定义纹理材质字体，无法在浏览器中直接动态渲染渲染。</p>
@@ -99,9 +99,7 @@
                         <!-- Action Section -->
                         <div class="meta-section actions-panel" v-if="fontLoaded">
                             <div class="section-title">资产操作</div>
-                            <button class="action-btn download-btn" @click="downloadFont">
-                                <span>📥</span> 下载 TTF 字体文件
-                            </button>
+                            <button class="action-btn download-btn" @click="downloadFont">下载 TTF 字体文件</button>
                         </div>
                     </div>
                 </div>
@@ -111,7 +109,7 @@
 </template>
 
 <script setup>
-import { UnityFSGui } from '@/assets/unityfs-gui'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
 import { onMounted, ref, nextTick } from 'vue'
 
 const props = defineProps(['assetManagerId', 'objectId'])

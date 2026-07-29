@@ -1,6 +1,6 @@
-﻿import { GKD } from './gkd-js-0.2/index'
-import { load } from './unityfs-js/index'
-import { AppData } from '../stores/counter'
+import { GKD } from '@/assets/gkd-js-0.2/index'
+import { load } from '@/assets/unityfs-js/index'
+
 export const UnityFSGui = {
     webFileCache: new Map(),
     assetManagers: {
@@ -8,6 +8,8 @@ export const UnityFSGui = {
         list: [],
         cache: [],
         maxCache: 5,
+        unityRevision: '',
+        sliceBeforeSecondUnityFS: false,
         add: function (assetManager) {
             this.list.push(assetManager)
         },
@@ -55,16 +57,13 @@ export const UnityFSGui = {
             // 调用 UnityJs 加载引擎
             let manager = null
             try {
-                // 获取用户设置的Unity版本
-                let appData = AppData()
                 let loadOptions = {}
-                if (appData.config.data.unityRevision) {
-                    loadOptions.unityRevision = appData.config.data.unityRevision
+                if (this.unityRevision) {
+                    loadOptions.unityRevision = this.unityRevision
                 }
 
-                // 获取用户设置 of sliceBeforeSecondUnityFS 选项
-                if (appData.config.data.sliceBeforeSecondUnityFS) {
-                    loadOptions.sliceBeforeSecondUnityFS = appData.config.data.sliceBeforeSecondUnityFS
+                if (this.sliceBeforeSecondUnityFS) {
+                    loadOptions.sliceBeforeSecondUnityFS = this.sliceBeforeSecondUnityFS
                 }
 
                 // 根据是否有版本参数决定调用方式
@@ -74,19 +73,18 @@ export const UnityFSGui = {
                     manager = await load(loadSource)
                 }
             } catch (err) {
-                console.log(err)
+                console.error(err)
                 let log = typeof loadSource == 'string' ? loadSource : 'assetManagerId:' + assetManagerId
                 UnityFSGui.log.add('打开[' + log + ']时出现错误')
                 return null
             }
-
 
             if (!manager) return null
 
             // === 关键修复：为原始 .assets 文件自动加载伴生资源文件 ===
             // 原始 .assets 文件中的流式纹理(Texture2D)和音频(AudioClip)
             // 数据存储在同目录下的 .resS 或 .resource 伴生文件中。
-            // 必须将这些文件注册到 AssetManager 后 resolveResource() 才能正常工作。
+            // 必须将这些文件注册 to AssetManager 后 resolveResource() 才能正常工作。
             if (typeof loadSource === 'string' && loadSource.includes('.')) {
                 await _loadCompanionResources(loadSource, manager)
             }
@@ -231,28 +229,15 @@ export const UnityFSGui = {
 
 /**
  * 为原始 .assets 文件自动加载伴生资源文件（.resS / .resource）
- *
- * 背景说明：Unity 原始 .assets 文件中，Texture2D 和 AudioClip 等大型资源
- * 通常以流式方式存储在独立的伴生文件（同名+.resS 或 .resource 后缀）中，
- * .assets 文件本身只保存偏移量和大小。必须读取这些伴生文件并注册到 AssetManager，
- * resolveResource() 才能正确提取子资源数据用于预览和导出。
- *
- * @param {string} assetsPath 原始 .assets 文件路径（必须是本地路径字符串）
- * @param {Object} manager    已解析的 AssetManager 实例
  */
 async function _loadCompanionResources(assetsPath, manager) {
-    // 只对 .assets 文件处理
     if (!assetsPath.toLowerCase().endsWith('.assets')) return
 
-    // 候选伴生文件路径列表（Unity 可能使用以下任一命名规则）
     const candidates = [assetsPath + '.resS', assetsPath + '.resource']
-
     const isWeb = typeof window !== 'undefined' && !window.__dirname && !window.cordova
 
     for (const candidatePath of candidates) {
         try {
-            // 在非 Web 浏览器（如 Electron、Cordova）环境下，先通过文件系统检查文件是否存在
-            // 避免 XHR 找不到文件时在控制台抛出 net::ERR_FILE_NOT_FOUND 的红字错误
             if (!isWeb) {
                 const check = await GKD.fs.exists(candidatePath)
                 if (!check.state) {
@@ -262,7 +247,6 @@ async function _loadCompanionResources(assetsPath, manager) {
 
             const data = await _fetchBinaryFile(candidatePath)
             if (data && data.byteLength > 0) {
-                // 用文件名作 key 注册，resolveResource 按文件名模糊匹配
                 const fileName = candidatePath.replace(/\\/g, '/').split('/').pop()
                 manager.registerResourceFile(fileName, new Uint8Array(data))
                 console.log(
@@ -270,15 +254,13 @@ async function _loadCompanionResources(assetsPath, manager) {
                 )
             }
         } catch (e) {
-            // 伴生文件不存在属于正常情况，静默忽略
+            // 静默忽略
         }
     }
 }
 
 /**
- * 通用二进制文件读取（兼容 file:// 本地路径和 http:// 远程路径）
- * @param {string} url 文件路径或 URL
- * @returns {Promise<ArrayBuffer|null>}
+ * 通用二进制文件读取
  */
 function _fetchBinaryFile(url) {
     return new Promise((resolve) => {

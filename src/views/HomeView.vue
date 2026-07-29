@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div
         class="homeTabsBox"
         ref="Home"
@@ -16,10 +16,11 @@
                 <t-button variant="text" @click="opneFileView">{{ i18nStore.t('file') }}</t-button>
                 <t-button variant="text" @click="openConfigurationView">{{ i18nStore.t('setting') }}</t-button>
                 <t-button variant="text" @click="openExportView">{{ i18nStore.t('export') }}</t-button>
-                <t-button variant="text" @click="appData.layers.permanent.spineView = true">{{
+                <t-button variant="text" @click="layerStore.permanent.spineView = true">{{
                     i18nStore.t('spinePreview')
                 }}</t-button>
                 <t-button variant="text" @click="openToolsView">{{ i18nStore.t('tools') }}</t-button>
+                <t-button variant="text" @click="openAboutView">{{ i18nStore.t('about') }}</t-button>
             </div>
 
             <div class="nav-tab-switcher">
@@ -60,16 +61,21 @@
 
 <script setup>
 import { onMounted, ref, useTemplateRef, computed } from 'vue'
-import { UnityFSGui } from '@/assets/unityfs-gui'
-import { AppData } from '@/stores/counter'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
+import { useConfigStore } from '@/stores/useConfigStore'
+import { useAssetStore } from '@/stores/useAssetStore'
+import { useLayerStore } from '@/layer-system/layerStore'
+import { platform } from '@/utils/platform'
 import { GKD } from '@/assets/gkd-js-0.2/index'
 import { MessagePlugin } from 'tdesign-vue-next'
 import { useI18nStore } from '@/stores/i18n'
 
-import ObjectListView from './ObjectListView.vue'
-import AssetFileListView from './AssetFileListView.vue'
+import ObjectListView from '../components/Home/ObjectListView.vue'
+import AssetFileListView from '../components/Home/AssetFileListView.vue'
 
-const appData = AppData()
+const configStore = useConfigStore()
+const assetStore = useAssetStore()
+const layerStore = useLayerStore()
 const i18nStore = useI18nStore()
 const HomeDiv = useTemplateRef('Home')
 
@@ -79,7 +85,7 @@ const importCount = ref(0)
 const isDragging = ref(false)
 const activeTab = ref('fileList')
 
-const isWebBrowser = computed(() => !window.__dirname && !window.cordova)
+const isWebBrowser = computed(() => platform.isWeb)
 
 /**
  * 初始化拖拽监听
@@ -226,7 +232,7 @@ async function newBundle(bundleList) {
     })
 
     // 保存至当前打开的文件及历史记录中
-    const isWeb = !window.__dirname && !window.cordova
+    const isWeb = platform.isWeb
     const filesToSave = bundleList.map((item) => {
         const fileObj = {
             path: item.path,
@@ -241,7 +247,7 @@ async function newBundle(bundleList) {
     })
 
     // 更新当前打开列表
-    appData.config.data.userOpenFile = filesToSave
+    configStore.data.userOpenFile = filesToSave
 
     // 保存至导入历史（可记录最近 20 次操作）
     const historyEntry = {
@@ -249,18 +255,19 @@ async function newBundle(bundleList) {
         timestamp: Date.now(),
         files: filesToSave.map((f) => ({ path: f.path, type: f.type })),
     }
-    const history = appData.config.data.importHistory || []
-    appData.config.data.importHistory = [historyEntry, ...history].slice(0, 20)
+    const history = configStore.data.importHistory || []
+    configStore.data.importHistory = [historyEntry, ...history].slice(0, 20)
 
-    appData.assetManagerUI.up()
+    assetStore.assetManagerUI.up()
     MessagePlugin.info(`正在打开 ${bundleList.length} 个资源`)
 }
 
 // 视图切换逻辑
-const opneFileView = () => appData.layers.addComponent({ name: 'OpenFile' })
-const openConfigurationView = () => appData.layers.addComponent({ name: 'ConfigurationView' })
-const openExportView = () => appData.layers.addComponent({ name: 'ExportView' })
-const openToolsView = () => appData.layers.addComponent({ name: 'ToolsView' })
+const opneFileView = () => layerStore.addComponent({ name: 'OpenFile' })
+const openConfigurationView = () => layerStore.addComponent({ name: 'ConfigurationView' })
+const openExportView = () => layerStore.addComponent({ name: 'ExportView' })
+const openToolsView = () => layerStore.addComponent({ name: 'ToolsView' })
+const openAboutView = () => layerStore.addComponent({ name: 'AboutView' })
 
 onMounted(start)
 

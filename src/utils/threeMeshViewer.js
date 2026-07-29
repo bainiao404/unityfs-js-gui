@@ -1,4 +1,4 @@
-﻿import * as THREE from 'three'
+import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 export class ThreeMeshViewer {
@@ -70,6 +70,18 @@ export class ThreeMeshViewer {
         this.resizeObserver.observe(this.container)
 
         // 7. Render/Animate Loop
+        this.play()
+    }
+
+    pause() {
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId)
+            this.animationFrameId = null
+        }
+    }
+
+    play() {
+        if (this.animationFrameId) return
         const animate = () => {
             this.animationFrameId = requestAnimationFrame(animate)
             if (this.controls) this.controls.update()

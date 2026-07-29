@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="data-viewer-container">
         <t-loading :loading="loading" show-overlay size="small" class="custom-tabs">
             <t-tabs v-model="activeTab">
@@ -41,7 +41,7 @@
 
 <script setup>
 import '@alenaksu/json-viewer'
-import { UnityFSGui } from '@/assets/unityfs-gui'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
 import { onMounted, ref, computed } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
 import { CopyIcon as TIconCopy } from 'tdesign-icons-vue-next'

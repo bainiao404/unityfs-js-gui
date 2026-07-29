@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="binary-viewer-container">
         <!-- Header Info & Toolbar -->
         <div class="viewer-header">
@@ -234,7 +234,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { UnityFSGui } from '@/assets/unityfs-gui'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
 import { MessagePlugin } from 'tdesign-vue-next'
 
 const props = defineProps({

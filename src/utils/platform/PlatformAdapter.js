@@ -8,6 +8,9 @@ export class PlatformAdapter {
     get isWebBrowser() {
         return false
     }
+    get isWeb() {
+        return this.isWebBrowser
+    }
     get name() {
         return 'Unknown'
     }

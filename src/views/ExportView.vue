@@ -140,9 +140,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { AppData } from '@/stores/counter'
-import { UnityFSGui } from '@/assets/unityfs-gui'
-import CordovaFileView from '../Class/CordovaFileView/CordovaFileView.vue'
+import { useConfigStore } from '@/stores/useConfigStore'
+import { useAssetStore } from '@/stores/useAssetStore'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
+import CordovaFileView from '../components/CordovaFileView/CordovaFileView.vue'
 import { MessagePlugin } from 'tdesign-vue-next'
 import { DownloadIcon as TIconDownload, DeleteIcon as TIconDelete } from 'tdesign-icons-vue-next'
 import { useI18nStore } from '@/stores/i18n'
@@ -150,8 +151,27 @@ import { FileHandleStorage } from '@/utils/fs/FileHandleStorage'
 import { ExportService } from '@/utils/export/ExportService'
 import { platform } from '@/utils/platform'
 
-const appData = AppData()
+const configStore = useConfigStore()
+const assetStore = useAssetStore()
 const i18nStore = useI18nStore()
+
+// Compatibility wrapper for template and ExportService
+const appData = {
+    config: configStore,
+    objectUI: assetStore.objectUI,
+    get webDirectoryHandle() {
+        return assetStore.webDirectoryHandle
+    },
+    set webDirectoryHandle(val) {
+        assetStore.webDirectoryHandle = val
+    },
+    get hasWebPermission() {
+        return assetStore.hasWebPermission
+    },
+    set hasWebPermission(val) {
+        assetStore.hasWebPermission = val
+    },
+}
 
 // 响应式状态
 const logList = ref([])
@@ -159,12 +179,12 @@ const isExporting = ref(false)
 const exportProgress = ref(0)
 const logCurrent = ref(null)
 const webDirectoryHandle = computed({
-    get: () => appData.webDirectoryHandle,
-    set: (val) => (appData.webDirectoryHandle = val),
+    get: () => assetStore.webDirectoryHandle,
+    set: (val) => (assetStore.webDirectoryHandle = val),
 })
 const hasWebPermission = computed({
-    get: () => appData.hasWebPermission,
-    set: (val) => (appData.hasWebPermission = val),
+    get: () => assetStore.hasWebPermission,
+    set: (val) => (assetStore.hasWebPermission = val),
 })
 
 // 平台判断从 platform 统一读取
@@ -386,7 +406,7 @@ async function exportLive2DStart() {
         }
 
         if (exportObjects.length === 0) {
-            log.add('⚠ 未找到可导出的 Live2D 模型 (CubismModel)', 'stage')
+            log.add('未找到可导出的 Live2D 模型 (CubismModel)', 'stage')
             isExporting.value = false
             return
         }

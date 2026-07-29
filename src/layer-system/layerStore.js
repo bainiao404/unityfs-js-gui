@@ -1,4 +1,4 @@
-﻿import { defineStore } from 'pinia'
+import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 export const useLayerStore = defineStore('layers', () => {
@@ -182,6 +182,61 @@ export const useLayerStore = defineStore('layers', () => {
         }
     }
 
+    const permanent = {
+        get spineView() {
+            return layers.value.some((l) => l.name === 'SpineView' && l.visible)
+        },
+        set spineView(val) {
+            if (val) {
+                add({
+                    name: 'SpineView',
+                    direction: 'bottom-to-top',
+                    singleton: true,
+                })
+            } else {
+                const spineLayer = layers.value.find((l) => l.name === 'SpineView')
+                if (spineLayer) {
+                    remove(spineLayer.id)
+                }
+            }
+        },
+    }
+
+    function addComponent(payload) {
+        let name = ''
+        let props = {}
+        let direction = 'right-to-left'
+        let singleton = false
+
+        if (typeof payload === 'string') {
+            name = payload
+        } else {
+            name = payload.name
+            props = payload.props || {}
+            if (payload.noAnimation) {
+                direction = 'fade'
+            } else if (payload.animationPath === 'bottom') {
+                direction = 'bottom-to-top'
+            }
+        }
+
+        const layer = add({
+            name,
+            props,
+            direction,
+            singleton,
+        })
+        return layer.id
+    }
+
+    function removeComponent(id) {
+        remove(id)
+    }
+
+    function backRemoveComponent() {
+        back()
+    }
+
     return {
         layers,
         orderedLayers,
@@ -191,5 +246,9 @@ export const useLayerStore = defineStore('layers', () => {
         back,
         finalizeRemove,
         clear,
+        permanent,
+        addComponent,
+        removeComponent,
+        backRemoveComponent,
     }
 })

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="audio-view-container">
         <div class="glow-bg">
             <div class="glow glow-1"></div>
@@ -128,8 +128,8 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue'
-import { UnityFSGui } from '@/assets/unityfs-gui'
+import { onMounted, onUnmounted, ref, computed, inject, watch } from 'vue'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
 import {
     PlayIcon as TIconPlay,
     PauseIcon as TIconPause,
@@ -282,8 +282,23 @@ function onAudioEnded() {
     progress.value = 0
     currentTime.value = 0
 }
+const isLayerActive = inject('isLayerActive', ref(true))
+
+watch(isLayerActive, (active) => {
+    if (!active && audioElement.value && isPlaying.value) {
+        audioElement.value.pause()
+        isPlaying.value = false
+    }
+})
 
 onMounted(start)
+
+onUnmounted(() => {
+    if (audioElement.value) {
+        audioElement.value.pause()
+        audioElement.value.src = ''
+    }
+})
 </script>
 
 <style scoped>

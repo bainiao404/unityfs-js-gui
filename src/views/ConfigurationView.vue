@@ -78,15 +78,20 @@
 </template>
 
 <script setup>
-import { AppData } from '@/stores/counter'
-import CordovaFileView from '../Class/CordovaFileView/CordovaFileView.vue'
+import { useConfigStore } from '@/stores/useConfigStore'
+import CordovaFileView from '../components/CordovaFileView/CordovaFileView.vue'
 import { useI18nStore } from '@/stores/i18n'
 import { platform } from '@/utils/platform'
 
-const appData = AppData()
+const configStore = useConfigStore()
 const i18nStore = useI18nStore()
 const isCordova = platform.isCordova
 const isElectron = platform.isElectron
+
+// Compatibility wrapper for template
+const appData = {
+    config: configStore,
+}
 
 function onOpenFileCordova(selection) {
     if (typeof platform.resolveSelection === 'function') {
@@ -104,7 +109,7 @@ async function setExportDir() {
     try {
         const path = await platform.selectDirectory()
         if (path) {
-            appData.config.data.lastDefaultSavedDirectory = path
+            configStore.data.lastDefaultSavedDirectory = path
         }
     } catch (err) {
         console.error('Failed to select directory:', err)

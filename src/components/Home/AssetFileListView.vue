@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="properties-container">
         <div v-if="assetFileList.length === 0" class="no-files-placeholder">
             {{ i18nStore.t('noFilesSelected') }}
@@ -40,11 +40,11 @@
 
 <script setup>
 import { watch, ref } from 'vue'
-import { UnityFSGui } from '@/assets/unityfs-gui'
-import { AppData } from '@/stores/counter'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
+import { useAssetStore } from '@/stores/useAssetStore'
 import { useI18nStore } from '@/stores/i18n'
 
-const mAppData = AppData()
+const assetStore = useAssetStore()
 const i18nStore = useI18nStore()
 const assetFileList = ref([])
 
@@ -88,7 +88,7 @@ function upView() {
 
 // Watch both upTime (start of load) and objectUI.list (completion of load)
 watch(
-    [() => mAppData.assetManagerUI.upTime, () => mAppData.objectUI.list],
+    [() => assetStore.assetManagerUI.upTime, () => assetStore.objectUI.list],
     () => {
         upView()
     },

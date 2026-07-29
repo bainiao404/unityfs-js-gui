@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="single-export-inline">
         <t-dropdown :options="menuOptions" @click="handleMenuClick" :min-column-width="120">
             <t-button variant="text" shape="square" :loading="loading" :disabled="loading" @click.stop>
@@ -10,10 +10,12 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { UnityFSGui } from '@/assets/unityfs-gui'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
 import { MessagePlugin } from 'tdesign-vue-next'
 import { MoreIcon as TIconMore } from 'tdesign-icons-vue-next'
-import { AppData } from '@/stores/counter'
+import { useConfigStore } from '@/stores/useConfigStore'
+import { useAssetStore } from '@/stores/useAssetStore'
+import { useLayerStore } from '@/layer-system/layerStore'
 import { useI18nStore } from '@/stores/i18n'
 import { platform } from '@/utils/platform'
 import { ExportService } from '@/utils/export/ExportService'
@@ -24,9 +26,21 @@ const props = defineProps({
     pathID: { type: String, default: null },
 })
 
-const appData = AppData()
+const configStore = useConfigStore()
+const assetStore = useAssetStore()
+const layerStore = useLayerStore()
 const i18nStore = useI18nStore()
 const loading = ref(false)
+
+// Compatibility wrapper for template and callbacks
+const appData = {
+    config: configStore,
+    objectUI: assetStore.objectUI,
+    layers: layerStore,
+    get webDirectoryHandle() {
+        return assetStore.webDirectoryHandle
+    },
+}
 
 const menuOptions = computed(() => {
     const options = [

@@ -552,7 +552,7 @@ export function readAnimation(input, skeletonData, skins, version = 36) {
             const event = {
                 int: input.readVarint(0),
                 float: input.readFloat(),
-                string: input.readBoolean() ? input.readString() : (eventData ? eventData.stringValue : ''),
+                string: input.readBoolean() ? input.readString() : eventData ? eventData.stringValue : '',
                 time: time,
                 name: name,
             }

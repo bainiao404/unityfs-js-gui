@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="data-viewer-container">
         <t-loading :loading="loading" show-overlay size="small" class="h-100 w-100">
             <div class="custom-tabs-layout">
@@ -30,13 +30,15 @@
 </template>
 
 <script setup>
-import JsonViewerMonaco from './tools/JsonViewerMonaco.vue'
-import { UnityFSGui } from '@/assets/unityfs-gui'
-import { onMounted, ref, useTemplateRef, nextTick } from 'vue'
-import SpineView from './SpineView.vue'
-import { AppData } from '@/stores/counter'
+import JsonViewerMonaco from '../tools/JsonViewerMonaco.vue'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
+import { onMounted, ref, nextTick } from 'vue'
+import { useAssetStore } from '@/stores/useAssetStore'
+import { useLayerStore } from '@/layer-system/layerStore'
 import SimpleSpine from '@/assets/SimpleSpine-0.2/index.js'
-const appData = AppData()
+
+const assetStore = useAssetStore()
+const layerStore = useLayerStore()
 const props = defineProps(['assetManagerId', 'objectId'])
 const text = ref('')
 const textJson = ref(null)
@@ -56,13 +58,13 @@ async function start() {
             textJson.value = JSON.parse(fileInfo.data.raw)
             activeTab.value = 'json'
             spineVersion = SimpleSpine.isVersion(textJson.value)
-        } catch (err) {
+        } catch {
             textJson.value = fileInfo.data.raw
             spineVersion = SimpleSpine.isVersion(fileInfo.data.raw)
         }
         if (spineVersion) {
-            appData.spineView.add([props.assetManagerId, props.objectId])
-            appData.layers.permanent.spineView = true
+            assetStore.spineView.add([props.assetManagerId, props.objectId])
+            layerStore.permanent.spineView = true
         }
         console.log(spineVersion)
     } catch (e) {

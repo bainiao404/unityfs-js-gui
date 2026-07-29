@@ -62,7 +62,7 @@ export class ElectronPlatform extends PlatformAdapter {
         const os = window.require ? window.require('os') : null
         if (!fs || !path || !os) return []
 
-        const { UnityFSGui } = await import('@/assets/unityfs-gui')
+        const { UnityFSGui } = await import('@/services/unity/UnityFSGuiService')
 
         try {
             const tempDir = path.join(os.tmpdir(), 'UnityJS-GUI-DragExport')
@@ -96,9 +96,10 @@ export class ElectronPlatform extends PlatformAdapter {
                         if (!fs.existsSync(fileDir)) {
                             fs.mkdirSync(fileDir, { recursive: true })
                         }
-                        const bufferData = subData instanceof Uint8Array
-                            ? Buffer.from(subData.buffer, subData.byteOffset, subData.byteLength)
-                            : Buffer.from(subData)
+                        const bufferData =
+                            subData instanceof Uint8Array
+                                ? Buffer.from(subData.buffer, subData.byteOffset, subData.byteLength)
+                                : Buffer.from(subData)
                         fs.writeFileSync(tempFilePath, bufferData)
                         modelTempPaths.push(tempFilePath)
                     }

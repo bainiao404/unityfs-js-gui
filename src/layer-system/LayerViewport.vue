@@ -1,8 +1,11 @@
-﻿<script setup>
+<script setup>
 import { defineAsyncComponent } from 'vue'
 import { useLayerStore } from './layerStore'
 import PageHeader from './PageHeader.vue'
 import { useI18nStore } from '../stores/i18n'
+import LayerContainer from './LayerContainer.vue'
+
+import { viewRegistry } from './viewRegistry'
 
 const layerStore = useLayerStore()
 const i18nStore = useI18nStore()
@@ -10,10 +13,11 @@ const i18nStore = useI18nStore()
 // Map component names to Vue files
 const componentsMap = {}
 
-// 自动扫描并懒加载其他组件（从多个目录导入）
-const fileViewModules = import.meta.glob('../components/FileView/**/*.vue')
-const homeModules = import.meta.glob('../components/Home/**/*.vue')
-const modules = { ...fileViewModules, ...homeModules }
+// 自动扫描并懒加载其他组件（从多个重构目录导入）
+const viewModules = import.meta.glob('../views/**/*.vue')
+const viewerModules = import.meta.glob('../viewers/**/*.vue')
+const toolModules = import.meta.glob('../tools/**/*.vue')
+const modules = { ...viewModules, ...viewerModules, ...toolModules }
 
 for (const path in modules) {
     const name = path
@@ -43,24 +47,12 @@ function getTransitionName(direction) {
 }
 
 function getLayerTitle(name) {
-    const titles = {
-        OpenFile: i18nStore.t('openFileTab'),
-        ConfigurationView: i18nStore.t('configSettingTab'),
-        ExportView: i18nStore.t('batchExportTab'),
-        SpineView: i18nStore.t('spinePreviewTab'),
-        ImgView: 'Image View',
-        TextView: 'Text View',
-        MonoScriptView: 'MonoScript Viewer',
-        MaterialView: 'Material Viewer',
-        FontView: 'Font Viewer',
-        AudioView: 'Audio Player',
-        MeshView: 'Mesh Viewer',
-        SingleFileExporter: 'Export Asset',
-        BinaryViewer: i18nStore.t('binaryViewerTab'),
-        ObjectDetails: i18nStore.t('objectDetailsTab'),
-        ToolsView: i18nStore.t('tools'),
+    const entry = viewRegistry[name]
+    if (entry) {
+        if (entry.titleKey) return i18nStore.t(entry.titleKey)
+        if (entry.title) return entry.title
     }
-    return titles[name] || name
+    return name
 }
 </script>
 <template>
@@ -85,7 +77,9 @@ function getLayerTitle(name) {
                     :title="getLayerTitle(layer.name)"
                 />
                 <div class="layer-content">
-                    <component :is="componentsMap[layer.name]" v-bind="layer.props" />
+                    <LayerContainer :layer="layer" :active-top-layer="layerStore.activeTopLayer">
+                        <component :is="componentsMap[layer.name]" v-bind="layer.props" />
+                    </LayerContainer>
                 </div>
             </div>
         </Transition>

@@ -39,8 +39,8 @@
                 <div v-else class="checkbox-placeholder"></div>
 
                 <div class="item-content" @click="handleItemClick(file)">
-                    <img class="file-icon" v-if="file.type == 'file'" src="./文件.png" />
-                    <img class="file-icon" v-if="file.type != 'file'" src="./文件夹.png" />
+                    <file1-icon class="file-icon file-icon-file" v-if="file.type == 'file'" />
+                    <folder-open-icon class="file-icon file-icon-folder" v-else />
                     <span class="file-name">{{ file.name }}</span>
                 </div>
             </div>
@@ -65,6 +65,7 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
+import { File1Icon, FolderOpenIcon } from 'tdesign-icons-vue-next'
 
 const props = defineProps({
     display: Boolean,
@@ -148,24 +149,31 @@ function getFile(path) {
     if (!path.endsWith('/')) path += '/'
     currentPath.value = path
     if (!window.resolveLocalFileSystemURL) return
-    window.resolveLocalFileSystemURL(path, (dirEntry) => {
-        const reader = dirEntry.createReader()
-        reader.readEntries((entries) => {
-            currentFileList.value = entries
-                .filter((e) => !e.name.startsWith('.'))
-                .map((e) => ({
-                    name: e.name,
-                    path: e.nativeURL || path + e.name,
-                    type: e.isFile ? 'file' : 'folder',
-                }))
-        }, (error) => {
-            console.error("readEntries error:", error);
-            MessagePlugin.error("读取目录内容失败: " + JSON.stringify(error));
-        })
-    }, (error) => {
-        console.error("resolveLocalFileSystemURL error:", error);
-        MessagePlugin.error("读取目录失败: " + JSON.stringify(error));
-    })
+    window.resolveLocalFileSystemURL(
+        path,
+        (dirEntry) => {
+            const reader = dirEntry.createReader()
+            reader.readEntries(
+                (entries) => {
+                    currentFileList.value = entries
+                        .filter((e) => !e.name.startsWith('.'))
+                        .map((e) => ({
+                            name: e.name,
+                            path: e.nativeURL || path + e.name,
+                            type: e.isFile ? 'file' : 'folder',
+                        }))
+                },
+                (error) => {
+                    console.error('readEntries error:', error)
+                    MessagePlugin.error('读取目录内容失败: ' + JSON.stringify(error))
+                },
+            )
+        },
+        (error) => {
+            console.error('resolveLocalFileSystemURL error:', error)
+            MessagePlugin.error('读取目录失败: ' + JSON.stringify(error))
+        },
+    )
 }
 
 function goBack() {
@@ -335,10 +343,17 @@ onMounted(() => {
 }
 
 .file-icon {
-    width: 28px;
-    height: 28px;
+    font-size: 24px;
     margin-right: 12px;
-    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.file-icon-file {
+    color: #0052d9;
+}
+
+.file-icon-folder {
+    color: #e3a300;
 }
 
 .file-name {

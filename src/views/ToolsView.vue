@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="tools-viewport-container">
         <div class="split-container">
             <!-- Left Pane: Tools Navigation/Switcher -->
@@ -45,9 +45,9 @@
 <script setup>
 import { ref } from 'vue'
 import { FileIcon, FileAddIcon, LockOnIcon } from 'tdesign-icons-vue-next'
-import AddressablesParser from './tools/AddressablesParser.vue'
-import Base64Tool from './tools/Base64Tool.vue'
-import AesTool from './tools/AesTool.vue'
+import AddressablesParser from '../tools/AddressablesParser.vue'
+import Base64Tool from '../tools/Base64Tool.vue'
+import AesTool from '../tools/AesTool.vue'
 
 // Active Tool Selection
 const activeTool = ref('addressables')

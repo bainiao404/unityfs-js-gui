@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="mesh-viewer-container">
         <t-loading :loading="loading" show-overlay size="large" class="loading-overlay">
             <div v-if="!loading" class="mesh-content-layout">
@@ -172,11 +172,11 @@
 </template>
 
 <script setup>
-import { UnityFSGui } from '@/assets/unityfs-gui'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
 import { setDependencies } from '@/assets/unityfs-js/index'
 import * as THREE from 'three'
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
-import { onMounted, ref, nextTick, onBeforeUnmount, watch } from 'vue'
+import { onMounted, ref, nextTick, onBeforeUnmount, watch, inject } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
 import { ThreeMeshViewer } from '@/utils/threeMeshViewer'
 
@@ -322,6 +322,18 @@ async function handleCopy() {
         MessagePlugin.error('Failed to copy to clipboard')
     }
 }
+
+const isLayerActive = inject('isLayerActive', ref(true))
+
+watch(isLayerActive, (active) => {
+    if (viewer) {
+        if (active) {
+            viewer.play()
+        } else {
+            viewer.pause()
+        }
+    }
+})
 
 onMounted(() => {
     setDependencies({ THREE, GLTFExporter })

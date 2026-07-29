@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="data-viewer-container">
         <t-loading :loading="loading" show-overlay size="small" class="h-100 w-100">
             <div class="custom-tabs-layout">
@@ -67,8 +67,8 @@
 </template>
 
 <script setup>
-import JsonViewerMonaco from './tools/JsonViewerMonaco.vue'
-import { UnityFSGui } from '@/assets/unityfs-gui'
+import JsonViewerMonaco from '../tools/JsonViewerMonaco.vue'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
 import { onMounted, ref, nextTick } from 'vue'
 
 const props = defineProps(['assetManagerId', 'objectId'])
@@ -95,8 +95,9 @@ async function start() {
         }
 
         // Prepare raw JSON dump for inspection
+        const info = await scriptObj.getInfo()
         rawJson.value = JSON.parse(
-            JSON.stringify(scriptObj, (key, value) => {
+            JSON.stringify(info, (key, value) => {
                 if (typeof value === 'bigint') {
                     return value.toString()
                 }

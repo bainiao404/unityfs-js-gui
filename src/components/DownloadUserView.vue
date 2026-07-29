@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <section class="download-container">
         <h3 class="section-title">正在下载 ({{ list.length }})</h3>
         <div v-if="list.length > 0" class="download-list">
@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { UnityFSGui } from '@/assets/unityfs-gui'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
 import { ref, computed, onMounted } from 'vue'
 
 const rawList = ref({})

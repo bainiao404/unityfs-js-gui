@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div
         class="spine-editor-container"
         :class="[backgroundType]"
@@ -52,15 +52,25 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch, markRaw, shallowRef, triggerRef } from 'vue'
+import { ref, reactive, computed, watch, markRaw, shallowRef, triggerRef, inject } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
-import { AppData } from '@/stores/counter'
+import { useConfigStore } from '@/stores/useConfigStore'
+import { useAssetStore } from '@/stores/useAssetStore'
+import { useLayerStore } from '@/layer-system/layerStore'
 import SimpleSpine from '@/assets/SimpleSpine-0.2/index.js'
-import { UnityFSGui } from '@/assets/unityfs-gui'
+import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
 import SpineViewport from './Spine/SpineViewport.vue'
 import SpineControlPanel from './Spine/SpineControlPanel.vue'
 
-const appData = AppData()
+const configStore = useConfigStore()
+const assetStore = useAssetStore()
+const layerStore = useLayerStore()
+
+const appData = {
+    config: configStore,
+    spineView: assetStore.spineView,
+    layers: layerStore,
+}
 
 // --- Refs & Component Instances ---
 const viewportRef = ref(null)
@@ -153,7 +163,7 @@ function updateSelectionBox() {
         selectionBox.y = active.instance.y
         selectionBox.scale.copyFrom(active.instance.scale)
         selectionBox.angle = active.instance.angle
-    } catch (e) {
+    } catch {
         // Safe check for destroyed nodes
     }
 }
@@ -202,7 +212,7 @@ async function loadSpines() {
                 const parsed = JSON.parse(rawData)
                 rawData = parsed
                 spineVersion = SimpleSpine.isVersion(parsed)
-            } catch (err) {
+            } catch {
                 const skelArrayBuffer = await assetManager.exportFile(object, { type: 'arrayBuffer' })
                 rawData = getArrayBuffer(skelArrayBuffer.data.raw)
                 spineVersion = SimpleSpine.detectSpineVersion({ data: rawData, type: 'skel' })
@@ -539,11 +549,21 @@ function setupDragInteraction(node) {
 
 // --- Watchers ---
 watch(() => appData.spineView.list, loadSpines, { deep: true })
+
+const isLayerActive = inject('isLayerActive', ref(true))
+
 watch(
-    () => appData.layers.permanent.spineView,
-    (val) => {
-        if (app) val ? app.start() : app.stop()
+    [isLayerActive, () => appData.layers.permanent.spineView],
+    ([active, visible]) => {
+        if (app) {
+            if (active && visible) {
+                app.start()
+            } else {
+                app.stop()
+            }
+        }
     },
+    { immediate: true },
 )
 
 watch(isPlaying, (playing) => {
@@ -551,8 +571,6 @@ watch(isPlaying, (playing) => {
         item.instance.state.timeScale = playing ? item.currentSpeed : 0
     })
 })
-
-// Redundant onMounted hook was removed to prevent concurrent loading race conditions.
 </script>
 
 <style scoped>

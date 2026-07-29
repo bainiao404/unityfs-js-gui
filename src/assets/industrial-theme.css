@@ -162,3 +162,32 @@ body {
 .t-textarea:focus {
     border-color: var(--td-brand-color) !important;
 }
+
+/* File Type Icon Color Palette */
+.icon-color-image {
+    color: #2ba471 !important;
+}
+.icon-color-audio {
+    color: #7c3aed !important;
+}
+.icon-color-code {
+    color: #0052d9 !important;
+}
+.icon-color-text {
+    color: #4b5563 !important;
+}
+.icon-color-font {
+    color: #d97706 !important;
+}
+.icon-color-material {
+    color: #db2777 !important;
+}
+.icon-color-mesh {
+    color: #0d9488 !important;
+}
+.icon-color-bundle {
+    color: #b45309 !important;
+}
+.icon-color-default {
+    color: #6b7280 !important;
+}
