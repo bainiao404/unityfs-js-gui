@@ -59,9 +59,20 @@ const reverseSort = ref(false)
 const filterType = ref([])
 
 // 视图展示模式：flat为扁平列表，tree为传统目录管理器形式
-const viewMode = ref(localStorage.getItem('object-list-view-mode') || 'flat')
+let initialViewMode = 'flat'
+try {
+    initialViewMode = localStorage.getItem('object-list-view-mode') || 'flat'
+} catch (e) {
+    console.warn('localStorage is not accessible:', e)
+}
+
+const viewMode = ref(initialViewMode)
 watch(viewMode, (newVal) => {
-    localStorage.setItem('object-list-view-mode', newVal)
+    try {
+        localStorage.setItem('object-list-view-mode', newVal)
+    } catch (e) {
+        console.warn('localStorage setItem failed:', e)
+    }
 })
 
 const objectType = computed(() => assetStore.objectTypes)

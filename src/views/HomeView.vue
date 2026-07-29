@@ -129,12 +129,19 @@ async function fileHandleDrop(event) {
         let allFiles = []
 
         try {
+            // 在执行任何 await 操作之前，必须同步提取出所有 entry
+            // 否则在 Chrome 浏览器中，DataTransferItemList 在第一个 await 异步 Tick 结束后会被清空
+            const entries = []
             for (let i = 0; i < items.length; i++) {
                 const entry = items[i].webkitGetAsEntry()
                 if (entry) {
-                    const results = await traverseFileTree(entry)
-                    allFiles.push(...results)
+                    entries.push(entry)
                 }
+            }
+
+            for (const entry of entries) {
+                const results = await traverseFileTree(entry)
+                allFiles.push(...results)
             }
 
             if (allFiles.length > 0) {
