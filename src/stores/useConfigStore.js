@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { reactive, watch } from 'vue'
 import { UnityFSGui } from '@/services/unity/UnityFSGuiService'
+import { safeLocalStorage } from '@/utils/storage/StorageManager'
 
 export const useConfigStore = defineStore('config', () => {
     const data = reactive({
@@ -26,7 +27,10 @@ export const useConfigStore = defineStore('config', () => {
     function loadConfig() {
         let loaded = null
         try {
-            loaded = JSON.parse(localStorage.getItem('unityfs-gui-config'))
+            const rawConfig = safeLocalStorage.getItem('unityfs-gui-config')
+            if (rawConfig) {
+                loaded = JSON.parse(rawConfig)
+            }
         } catch {
             // Ignore syntax error from parsing config
         }
@@ -43,11 +47,7 @@ export const useConfigStore = defineStore('config', () => {
     }
 
     function saveConfig() {
-        try {
-            localStorage.setItem('unityfs-gui-config', JSON.stringify(data))
-        } catch (err) {
-            console.warn('localStorage setItem failed:', err)
-        }
+        safeLocalStorage.setItem('unityfs-gui-config', JSON.stringify(data))
     }
 
     function syncToEngine() {

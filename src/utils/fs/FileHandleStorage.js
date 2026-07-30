@@ -1,19 +1,7 @@
-﻿const DB_NAME = 'UintyJsGuiDB'
+import { safeIndexedDB } from '@/utils/storage/StorageManager'
+
 const STORE_NAME = 'file_handles'
 const HANDLE_KEY = 'last_dir_handle'
-
-function openDB() {
-    return new Promise((resolve, reject) => {
-        if (typeof indexedDB === 'undefined') {
-            reject(new Error('IndexedDB is not supported'))
-            return
-        }
-        const request = indexedDB.open(DB_NAME, 1)
-        request.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME)
-        request.onsuccess = (e) => resolve(e.target.result)
-        request.onerror = (e) => reject(e)
-    })
-}
 
 export const FileHandleStorage = {
     /**
@@ -22,14 +10,7 @@ export const FileHandleStorage = {
      * @returns {Promise<void>}
      */
     async saveDirectoryHandle(handle) {
-        const db = await openDB()
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction(STORE_NAME, 'readwrite')
-            const store = transaction.objectStore(STORE_NAME)
-            const request = store.put(handle, HANDLE_KEY)
-            request.onsuccess = () => resolve()
-            request.onerror = (e) => reject(e)
-        })
+        return safeIndexedDB.setItem(STORE_NAME, HANDLE_KEY, handle)
     },
 
     /**
@@ -37,19 +18,7 @@ export const FileHandleStorage = {
      * @returns {Promise<FileSystemDirectoryHandle|null>}
      */
     async getSavedDirectoryHandle() {
-        try {
-            const db = await openDB()
-            return new Promise((resolve) => {
-                const transaction = db.transaction(STORE_NAME, 'readonly')
-                const store = transaction.objectStore(STORE_NAME)
-                const request = store.get(HANDLE_KEY)
-                request.onsuccess = () => resolve(request.result || null)
-                request.onerror = () => resolve(null)
-            })
-        } catch (err) {
-            console.warn('Failed to retrieve directory handle from IndexedDB:', err)
-            return null
-        }
+        return safeIndexedDB.getItem(STORE_NAME, HANDLE_KEY)
     },
 
     /**
@@ -57,18 +26,7 @@ export const FileHandleStorage = {
      * @returns {Promise<void>}
      */
     async clearDirectoryHandle() {
-        try {
-            const db = await openDB()
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction(STORE_NAME, 'readwrite')
-                const store = transaction.objectStore(STORE_NAME)
-                const request = store.delete(HANDLE_KEY)
-                request.onsuccess = () => resolve()
-                request.onerror = (e) => reject(e)
-            })
-        } catch (err) {
-            console.warn('Failed to clear directory handle from IndexedDB:', err)
-        }
+        return safeIndexedDB.removeItem(STORE_NAME, HANDLE_KEY)
     },
 
     /**

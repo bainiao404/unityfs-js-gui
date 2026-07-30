@@ -1,23 +1,15 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { safeLocalStorage } from '@/utils/storage/StorageManager'
 
 export const useI18nStore = defineStore('i18n', () => {
     // Read stored locale or fallback to 'zh'
-    let initialLocale = 'zh'
-    try {
-        initialLocale = localStorage.getItem('gkd_locale') || 'zh'
-    } catch (e) {
-        console.warn('localStorage is not accessible:', e)
-    }
+    const initialLocale = safeLocalStorage.getItem('gkd_locale') || 'zh'
     const locale = ref(initialLocale)
 
     const setLocale = (newLocale) => {
         locale.value = newLocale
-        try {
-            localStorage.setItem('gkd_locale', newLocale)
-        } catch (e) {
-            console.warn('localStorage setItem failed:', e)
-        }
+        safeLocalStorage.setItem('gkd_locale', newLocale)
     }
 
     const messages = {

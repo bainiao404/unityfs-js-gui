@@ -5,6 +5,7 @@
 
 import { request } from './ajax.js'
 import * as fs from './fs.js'
+import { safeLocalStorage } from '@/utils/storage/StorageManager'
 
 /**
  * 文件下载状态常量
@@ -295,7 +296,8 @@ export class SingleTask {
     // 从 LocalStorage 加载下载缓存
     _loadCache() {
         try {
-            const dump = JSON.parse(localStorage.getItem('gkDownload') || '{}')
+            const rawCache = safeLocalStorage.getItem('gkDownload')
+            const dump = rawCache ? JSON.parse(rawCache) : {}
             this.cache.load(dump)
             this.fileQueue.forEach((f) => {
                 if (this.cache.get(hash(f.url))) {
@@ -312,11 +314,7 @@ export class SingleTask {
         this.fileQueue
             .filter((f) => f.state === FILE_STATE.SAVED || f.state === FILE_STATE.LOCAL_EXIST)
             .forEach((f) => this.cache.set(hash(f.url)))
-        try {
-            localStorage.setItem('gkDownload', JSON.stringify(this.cache.dump()))
-        } catch (e) {
-            console.warn('localStorage setItem failed:', e)
-        }
+        safeLocalStorage.setItem('gkDownload', JSON.stringify(this.cache.dump()))
     }
 }
 
@@ -407,11 +405,7 @@ export const downloadFile = {
     pauseTask: () => defaultPool.pause(),
     resumeTask: () => defaultPool.resume(),
     delMemory: () => {
-        try {
-            localStorage.removeItem('gkDownload')
-        } catch (e) {
-            console.warn('localStorage removeItem failed:', e)
-        }
+        safeLocalStorage.removeItem('gkDownload')
     },
     generateRandomId: randId,
     /* 透传配置 */

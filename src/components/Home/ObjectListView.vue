@@ -47,6 +47,7 @@
 <script setup>
 import { computed, ref, watch, markRaw } from 'vue'
 import { useAssetStore } from '@/stores/useAssetStore'
+import { safeLocalStorage } from '@/utils/storage/StorageManager'
 import LoadProgressCard from '../LoadProgressCard.vue'
 import FlatObjectListView from './FlatObjectListView.vue'
 import HierarchicalObjectListView from './HierarchicalObjectListView.vue'
@@ -59,20 +60,9 @@ const reverseSort = ref(false)
 const filterType = ref([])
 
 // 视图展示模式：flat为扁平列表，tree为传统目录管理器形式
-let initialViewMode = 'flat'
-try {
-    initialViewMode = localStorage.getItem('object-list-view-mode') || 'flat'
-} catch (e) {
-    console.warn('localStorage is not accessible:', e)
-}
-
-const viewMode = ref(initialViewMode)
+const viewMode = ref(safeLocalStorage.getItem('object-list-view-mode') || 'flat')
 watch(viewMode, (newVal) => {
-    try {
-        localStorage.setItem('object-list-view-mode', newVal)
-    } catch (e) {
-        console.warn('localStorage setItem failed:', e)
-    }
+    safeLocalStorage.setItem('object-list-view-mode', newVal)
 })
 
 const objectType = computed(() => assetStore.objectTypes)
