@@ -123,6 +123,11 @@ export const useI18nStore = defineStore('i18n', () => {
             authSuccess: '授权成功',
             authFailed: '授权失败',
             exportLive2D: '导出 Live2D',
+            pngEncoder: '图片编码器',
+            encoderAuto: '自动 (推荐)',
+            encoderWasm: 'WASM (LodePNG)',
+            encoderCanvas: 'Canvas (浏览器)',
+            encoderUpng: 'UPNG (纯JS)',
         },
         en: {
             // General & Shell
@@ -234,6 +239,11 @@ export const useI18nStore = defineStore('i18n', () => {
             authSuccess: 'Authorization successful',
             authFailed: 'Authorization failed',
             exportLive2D: 'Export Live2D',
+            pngEncoder: 'Image Encoder',
+            encoderAuto: 'Auto (Recommended)',
+            encoderWasm: 'WASM (LodePNG)',
+            encoderCanvas: 'Canvas (Browser)',
+            encoderUpng: 'UPNG (Pure JS)',
         },
     }
 

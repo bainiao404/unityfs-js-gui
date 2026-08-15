@@ -116,6 +116,7 @@ export class ExportServiceClass {
                 const exportConfig = {
                     type: 'arrayBuffer',
                     worker: true,
+                    encoder: this.appData?.config?.data?.pngEncoder || 'auto',
                     cutting: object.className === 'Sprite' ? this.appData.config.data.spriteCutting : false,
                 }
 
@@ -237,7 +238,11 @@ export class ExportServiceClass {
                         }
                         src = filePath.path ? `${filePath.path}/${nameWithExt}` : nameWithExt
                     } else {
-                        let exportConfig = { type: 'arrayBuffer', worker: true }
+                        let exportConfig = {
+                            type: 'arrayBuffer',
+                            worker: true,
+                            encoder: this.appData?.config?.data?.pngEncoder || 'auto',
+                        }
                         if (object.className === 'Sprite') {
                             exportConfig.cutting = this.appData.config.data.spriteCutting
                         }

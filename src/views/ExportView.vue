@@ -29,6 +29,18 @@
                         </t-form-item>
 
                         <t-form-item
+                            :label="i18nStore.t('pngEncoder')"
+                            v-if="appData.config.data.exportMode !== 'raw'"
+                        >
+                            <t-radio-group variant="default-filled" v-model="appData.config.data.pngEncoder">
+                                <t-radio-button value="auto">{{ i18nStore.t('encoderAuto') }}</t-radio-button>
+                                <t-radio-button value="wasm">{{ i18nStore.t('encoderWasm') }}</t-radio-button>
+                                <t-radio-button value="canvas">{{ i18nStore.t('encoderCanvas') }}</t-radio-button>
+                                <t-radio-button value="upng">{{ i18nStore.t('encoderUpng') }}</t-radio-button>
+                            </t-radio-group>
+                        </t-form-item>
+
+                        <t-form-item
                             :label="i18nStore.t('spriteOption')"
                             v-if="appData.config.data.exportMode !== 'raw'"
                         >

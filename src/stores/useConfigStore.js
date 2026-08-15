@@ -22,6 +22,7 @@ export const useConfigStore = defineStore('config', () => {
         autoRestoreLastFile: false,
         importHistory: [],
         exportMode: 'standard',
+        pngEncoder: 'auto',
     })
 
     function loadConfig() {
